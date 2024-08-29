@@ -1,0 +1,33 @@
+<div class="w-full flex items-center justify-center p-2 h-screen">
+    <div class="flex flex-col items-center justify-center gap-4 p-8 rounded-lg shadow-lg bg-white min-w-[300px] w-[400px] lg:w-[450px]">
+      <img src="/assets/images/logo512.png" alt="Logo" class="mx-auto max-h-[130px]" />
+      <h1 class="text-center text-2xl font-bold uppercase">Altopac</h1>
+      <form [formGroup]="loginForm" (ngSubmit)="handleSubmit()" class="flex flex-col gap-4 w-full">
+        <app-input-field
+          label="Email:"
+          type="email"
+          placeholder="johndoe@email.com"
+          [formControl]="email"
+          [error]="errors.email"
+          >
+        </app-input-field>
+        <app-input-field    
+          label="Password:"
+          type="password"
+          placeholder="********"
+          [formControl]="password"
+          [error]="errors.password"
+          >
+        </app-input-field>
+        <div class="flex justify-center mt-4 w-full">
+          <button
+            type="submit"
+            [disabled]="isLoading"
+            class="w-full h-10 py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:hover:bg-blue-500">
+            <span *ngIf="isLoading">Loading...</span>
+            <span *ngIf="!isLoading">Login</span>
+          </button>
+        </div>
+      </form>
+    </div>
+</div>
