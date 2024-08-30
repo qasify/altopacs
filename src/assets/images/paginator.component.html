@@ -1,0 +1,46 @@
+<div class="paginator">
+  <button (click)="goToPage(1)" [disabled]="currentPage === 1">
+    <img
+      src="assets/images/chevron-left.svg"
+      alt="<"
+      class="h-[24px] w-[24px]"
+    />
+  </button>
+  <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">
+    <img
+      src="assets/images/chevron-left.svg"
+      alt="<"
+      class="h-[24px] w-[24px]"
+    />
+  </button>
+  <div class="page-numbers">
+    <span *ngFor="let page of getPageNumbers()">
+      <button
+        [class]="currentPage === page ? 'active' : ''"
+        (click)="goToPage(page)"
+      >
+        {{ page }}
+      </button>
+    </span>
+  </div>
+  <button
+    (click)="goToPage(currentPage + 1)"
+    [disabled]="currentPage === totalPages"
+  >
+    <img
+      src="assets/images/chevron-right.svg"
+      alt="<"
+      class="h-[24px] w-[24px]"
+    />
+  </button>
+  <button
+    (click)="goToPage(totalPages)"
+    [disabled]="currentPage === totalPages"
+  >
+    <img
+      src="assets/images/chevron-right.svg"
+      alt="<"
+      class="h-[24px] w-[24px]"
+    />
+  </button>
+</div>

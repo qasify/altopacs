@@ -1,1 +1,72 @@
-<p>home works!</p>
+<div class="w-full flex flex-col justify-center h-screen bg-[#8B00760A]">
+  <div
+    class="flex justify-between p-3 px-6 shadow-[0px_1px_2px_0px_#00000014] bg-white"
+  >
+    <h1 class="text-2xl font-semibold text-center flex items-center">
+      Patients
+    </h1>
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Search patients"
+      (input)="onInputChange($event)"
+    />
+  </div>
+
+  <div class="flex flex-col flex-1 p-6 items-center gap-6">
+    <div
+      class="w-full h-[90%] bg-white p-2 rounded-2xl shadow-[0px_1px_2px_0px_#00000014]"
+    >
+      <table class="w-full border-collapse table-auto h-max">
+        <thead>
+          <tr class="text-[#717171]">
+            <th>
+              <div class="flex items-center gap-4">
+                <div
+                  class="h-[36px] w-[36px] bg-[#E7E7E7] rounded-full flex items-center justify-center"
+                >
+                  #
+                </div>
+                Name
+              </div>
+            </th>
+            <th>Age</th>
+            <th>Issue</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="
+              let patient of filteredPatients
+                | slice : (currentPage - 1) * pageSize : currentPage * pageSize
+            "
+          >
+            <td>
+              <div class="flex items-center gap-4 h-full">
+                <img
+                  [src]="getPatientImageUrl(patient)"
+                  alt="Patient Image"
+                  class="h-[36px] w-[36px]"
+                />
+                {{ patient.name }}
+              </div>
+            </td>
+            <td>{{ patient.age }}</td>
+            <td>{{ patient.issue }}</td>
+            <td class="w-[160px]">
+              <button>Examine</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <app-paginator
+      [totalItems]="filteredPatients.length"
+      [pageSize]="pageSize"
+      [currentPage]="currentPage"
+      (pageChange)="onPageChange($event)"
+    ></app-paginator>
+  </div>
+</div>

@@ -1,0 +1,48 @@
+/* Search input */
+input[type="text"] {
+  padding: 8px 16px;
+  width: 30%;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+}
+
+th,
+td {
+  min-width: 120px;
+  border-bottom: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+  word-break: break-all;
+  word-wrap: break-word;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 16px;
+  text-align: left;
+}
+
+th {
+  height: 60px;
+  font-size: 16px;
+}
+
+td > button {
+  border: 1px solid #d0d0d0;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  text-align: center;
+  color: #121212;
+}
+
+td > button:hover {
+  background-color: #d0d0d040;
+}
+
+/* Pagination controls */
+.pagination-container {
+  text-align: center;
+  margin-top: 20px;
+}
