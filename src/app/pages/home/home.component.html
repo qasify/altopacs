@@ -55,7 +55,7 @@
             <td>{{ patient.age }}</td>
             <td>{{ patient.issue }}</td>
             <td class="w-[160px]">
-              <button>Examine</button>
+              <button (click)="examinePatient(patient.id)">Examine</button>
             </td>
           </tr>
         </tbody>
@@ -70,3 +70,5 @@
     ></app-paginator>
   </div>
 </div>
+
+

@@ -1,0 +1,20 @@
+<div class="flex flex-col items-center">
+    <!-- Image Box -->
+    <div id="cornerstone-element" class="w-128 h-128 border border-gray-300"></div>
+  
+    <!-- Controls -->
+    <div class="mt-4 space-x-2">
+      <button (click)="zoomIn()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Zoom In</button>
+      <button (click)="zoomOut()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Zoom Out</button>
+      <button (click)="increaseContrast()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Increase Contrast</button>
+      <button (click)="decreaseContrast()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Decrease Contrast</button>
+      <button (click)="nextImage()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Next Image</button>
+      <button (click)="previousImage()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Previous Image</button>
+    </div>
+  
+    <!-- Feedback Box -->
+    <div class="mt-6 w-128">
+      <textarea [(ngModel)]="feedback" class="w-full h-24 p-3 text-lg border border-gray-300 rounded" placeholder="Write your feedback here..."></textarea>
+    </div>
+</div>
+  
