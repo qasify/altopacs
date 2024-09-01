@@ -1,28 +1,38 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as cornerstone from 'cornerstone-core';
 import cornerstoneTools from 'cornerstone-tools';
+import cornerstoneMath from 'cornerstone-math';
 import cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import * as dicomParser from 'dicom-parser';
+import Hammer from 'hammerjs';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-details',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, CommonModule],
   templateUrl: './details.component.html',
-  styleUrl: './details.component.scss',
+  styleUrls: ['./details.component.scss'],
 })
-export class DetailsComponent implements OnInit {
-  private imageIndex: number = 0;
-  private images: string[] = [
-    'assets/dicom/image1.dcm',
-    'assets/dicom/image2.dcm',
-    'assets/dicom/image3.dcm',
-  ];
+export class DetailsComponent implements OnInit, OnDestroy {
+  private image: string = 'assets/dicom/image1.dcm';
+  currentFrame: number = 0;
+  totalFrames: number = 0;
+
   patientId: string | null = null;
   feedback: string = '';
-  cornerStoneElement: HTMLElement | null = null;
+  private cornerStoneElement: HTMLElement | null = null;
+
+  public toolMode: 'zoom' | 'contrast' | 'image' = 'zoom'; // Changed to public
+  public zoomScale: number = 1; // Initial zoom scale
+  public contrastWidth: number = 400; // Initial contrast width
+
+  readonly MIN_ZOOM_SCALE: number = 1;
+  readonly MAX_ZOOM_SCALE: number = 10;
+  readonly MIN_CONTRAST_WIDTH: number = 0;
+  readonly MAX_CONTRAST_WIDTH: number = 2000;
 
   constructor(private route: ActivatedRoute, private router: Router) {}
 
@@ -32,22 +42,43 @@ export class DetailsComponent implements OnInit {
     if (!this.patientId) {
       this.router.navigate(['/']); // Redirect to the root path
     } else {
-      // Initialize Cornerstone on the this.cornerStoneElement!
       this.cornerStoneElement = document.getElementById('cornerstone-element');
-      cornerstone.enable(this.cornerStoneElement!);
+      if (this.cornerStoneElement) {
+        //Add Image loader
+        cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
+        cornerstoneWADOImageLoader.external.dicomParser = dicomParser;
 
-      cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
-      cornerstoneWADOImageLoader.external.dicomParser = dicomParser;
+        //Add tools
+        cornerstoneTools.external.cornerstone = cornerstone;
+        cornerstoneTools.external.Hammer = Hammer;
+        cornerstoneTools.external.cornerstoneMath = cornerstoneMath;
+        cornerstoneTools.init();
 
-      // Initialize Cornerstone Tools
-      cornerstoneTools.external.cornerstone = cornerstone;
-      cornerstoneTools.init();
-      cornerstoneTools.addTool(cornerstoneTools.PanTool);
-      cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 }); // Enable pan with left mouse button
+        // Load the first DICOM image
+        cornerstone.enable(this.cornerStoneElement);
+        this.loadImage(this.image);
 
-      // Load the first DICOM image
-      this.loadImage(this.images[this.imageIndex]);
+        // Add and enable the Pan tool
+        const PanTool = cornerstoneTools.PanTool;
+        cornerstoneTools.addTool(PanTool);
+        cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 }); // Enable pan with left mouse button
 
+        // Add event listener for mouse wheel
+        this.cornerStoneElement.addEventListener(
+          'wheel',
+          this.handleMouseWheel.bind(this)
+        );
+      }
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.cornerStoneElement) {
+      cornerstone.disable(this.cornerStoneElement);
+      this.cornerStoneElement.removeEventListener(
+        'wheel',
+        this.handleMouseWheel.bind(this)
+      );
     }
   }
 
@@ -58,47 +89,115 @@ export class DetailsComponent implements OnInit {
       .loadImage(imageId)
       .then((image) => {
         cornerstone.displayImage(this.cornerStoneElement!, image);
+        // this.totalFrames = image.data.string('x00280008') || 1; // Number of frames
+        // cornerstone.setFrame(this.cornerStoneElement!, this.currentFrame);
       })
       .catch((error) => {
         console.error('Error loading image:', error);
       });
   }
 
-  zoomIn(): void {
+  handleMouseWheel(event: WheelEvent): void {
+    event.preventDefault();
+
+    const delta = event.deltaY > 0 ? -1 : 1; // Scroll up = -1, Scroll down = 1
+
     const viewport = cornerstone.getViewport(this.cornerStoneElement!);
-    viewport!.scale += 0.1; // Adjust zoom increment as needed
+
+    switch (this.toolMode) {
+      case 'zoom':
+        this.zoomScale += delta * 0.1;
+        this.zoomScale = Math.max(
+          this.MIN_ZOOM_SCALE,
+          Math.min(this.zoomScale, this.MAX_ZOOM_SCALE)
+        );
+        viewport!.scale = this.zoomScale;
+        break;
+      case 'contrast':
+        this.contrastWidth += delta * 10;
+        this.contrastWidth = Math.max(
+          this.MIN_CONTRAST_WIDTH,
+          Math.min(this.contrastWidth, this.MAX_CONTRAST_WIDTH)
+        );
+        viewport!.voi.windowWidth = this.contrastWidth;
+        break;
+      case 'image':
+        if (delta < 0) {
+          this.nextFrame();
+        } else {
+          this.previousFrame();
+        }
+        return; // Do not update viewport for image switching
+    }
+
+    cornerstone.setViewport(this.cornerStoneElement!, viewport);
+
+    // Update sliders to reflect changes
+    this.updateSliders();
+  }
+
+  setToolMode(mode: 'zoom' | 'contrast' | 'image'): void {
+    this.toolMode = mode;
+    this.updateSliders();
+  }
+
+  updateZoom(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.zoomScale = parseFloat(target.value);
+    this.zoomScale = Math.max(
+      this.MIN_ZOOM_SCALE,
+      Math.min(this.zoomScale, this.MAX_ZOOM_SCALE)
+    );
+    const viewport = cornerstone.getViewport(this.cornerStoneElement!);
+    viewport!.scale = this.zoomScale;
     cornerstone.setViewport(this.cornerStoneElement!, viewport);
   }
 
-  zoomOut(): void {
+  updateContrast(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.contrastWidth = parseFloat(target.value);
+    this.contrastWidth = Math.max(
+      this.MIN_CONTRAST_WIDTH,
+      Math.min(this.contrastWidth, this.MAX_CONTRAST_WIDTH)
+    );
     const viewport = cornerstone.getViewport(this.cornerStoneElement!);
-    viewport!.scale -= 0.1; // Adjust zoom decrement as needed
+    viewport!.voi.windowWidth = this.contrastWidth;
     cornerstone.setViewport(this.cornerStoneElement!, viewport);
   }
 
-  increaseContrast(): void {
-    const viewport = cornerstone.getViewport(this.cornerStoneElement!);
-    viewport!.voi.windowWidth += 10; // Adjust contrast increment as needed
-    cornerstone.setViewport(this.cornerStoneElement!, viewport);
-  }
-
-  decreaseContrast(): void {
-    const viewport = cornerstone.getViewport(this.cornerStoneElement!);
-    viewport!.voi.windowWidth -= 10; // Adjust contrast decrement as needed
-    cornerstone.setViewport(this.cornerStoneElement!, viewport);
-  }
-
-  nextImage(): void {
-    if (this.imageIndex < this.images.length - 1) {
-      this.imageIndex++;
-      this.loadImage(this.images[this.imageIndex]);
+  nextFrame(): void {
+    if (this.currentFrame < this.totalFrames) {
+      this.currentFrame++;
+      // this.loadImage(this.images[this.imageIndex]);
     }
   }
 
-  previousImage(): void {
-    if (this.imageIndex > 0) {
-      this.imageIndex--;
-      this.loadImage(this.images[this.imageIndex]);
+  previousFrame(): void {
+    if (this.currentFrame> 0) {
+      this.currentFrame--;
+      // this.loadImage(this.images[this.imageIndex]);
     }
+  }
+
+  updateSliders(): void {
+    const zoomSlider = document.getElementById(
+      'zoom-slider'
+    ) as HTMLInputElement;
+    const contrastSlider = document.getElementById(
+      'contrast-slider'
+    ) as HTMLInputElement;
+
+    if (zoomSlider) {
+      zoomSlider.value = this.zoomScale.toString();
+    }
+
+    if (contrastSlider) {
+      contrastSlider.value = this.contrastWidth.toString();
+    }
+  }
+
+  handleSave():void {
+    // TODO: Saving feedback logic
+    this.router.navigate(['/']);
   }
 }
