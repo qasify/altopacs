@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { PaginatorComponent } from '../../components/paginator/paginator.component';
 import { PATIENTS } from '../../mockData';
 import { Router } from '@angular/router';
+import { Patient } from '../../types/Patient';
 
 @Component({
   selector: 'app-home',
@@ -14,7 +15,7 @@ import { Router } from '@angular/router';
 export class HomeComponent implements OnInit {
   constructor(private router: Router) {}
 
-  patients: any[] = PATIENTS;
+  patients: Patient[] = PATIENTS;
 
   filteredPatients: any[] = [];
   currentPage: number = 1;
@@ -52,7 +53,7 @@ export class HomeComponent implements OnInit {
   }
 
   examinePatient(id: number) {
-    this.router.navigate(['/details'], {
+    this.router.navigate(['/examine'], {
       queryParams: { id: id },
       queryParamsHandling: 'merge',
     });

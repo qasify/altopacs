@@ -1,4 +1,6 @@
-export const PATIENTS: any[] = [
+import { Patient } from "./types/Patient";
+
+export const PATIENTS: Patient[] = [
   // Sample patient data
   { id: 1, name: 'John Doe', age: 35, issue: 'Headache' },
   { id: 2, name: 'Abraham', age: 35, issue: 'Headache' },

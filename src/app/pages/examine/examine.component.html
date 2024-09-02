@@ -1,0 +1,57 @@
+<div class="flex flex-col items-center bg-[#8B00760A] w-screen h-screen">
+  <div
+    class="flex justify-between p-3 px-6 shadow-[0px_1px_2px_0px_#00000014] bg-white w-full h-16"
+  >
+    <h1 class="text-2xl font-semibold text-center flex items-center shrink-0 cursor-pointer" (click)="handleBack()">
+      Examine
+    </h1>
+    <h4 class="text-xl text-center flex items-center shrink-0">
+      Patient Name: &nbsp;
+      <b>{{patient?.name}}</b>
+    </h4>
+  </div>  
+
+  <!-- Image Box -->
+  <div id="cornerstone-element" class="w-[100vh] h-[75vh] border border-gray-300 relative rounded-lg overflow-hidden mt-4">
+    <div class="absolute left-2 bottom-2 text-white flex flex-col bg-black/50 rounded-lg w-72 px-4 py-2">
+      <label>Zoom: <b>{{ zoomScale | number: '1.1-1' }}</b></label>
+      <label>Window/Levels: <b>{{ windowWidth }}/{{ windowCenter }}</b></label>
+      <label>Frame: <b>{{ currentFrame }}/{{ totalFrames }}</b></label>
+    </div>
+  </div> 
+
+  <!-- Controls -->
+  <div class="mt-4 w-[900px] flex items-center flex-col space-y-2">
+    <!-- <h3>Mouse</h3> -->
+    <div class="space-x-2 flex items-center flex-row ">
+      <button (click)="setToolMode('pan')" [ngClass]="{'bg-blue-500 text-white': toolMode === 'pan', 'bg-white hover:bg-gray-200': toolMode !== 'pan'}" class=" w-40">Pan</button>
+      <button (click)="setToolMode('zoom')" [ngClass]="{'bg-blue-500 text-white': toolMode === 'zoom', 'bg-white hover:bg-gray-200': toolMode !== 'zoom'}" class="w-40">Zoom</button>
+      <button (click)="setToolMode('contrast')" [ngClass]="{'bg-blue-500 text-white': toolMode === 'contrast', 'bg-white hover:bg-gray-200': toolMode !== 'contrast'}" class="w-40">WIndow/Level</button>
+      <button (click)="setToolMode('frame')" [ngClass]="{'bg-blue-500 text-white': toolMode === 'frame', 'bg-white hover:bg-gray-200': toolMode !== 'frame'}" class="w-40">Frame</button>
+    </div>
+  </div>
+
+
+  <!-- Trackpads -->
+  <!-- <div class="mt-4 w-[900px] space-x-2 flex items-center flex-col border border-gray-300 rounded-md p-2 pr-3">
+    <h3>Manual</h3>
+    <label class="flex flex-col w-full">Zoom:
+      <input id="zoom-slider" type="range" [min]="MIN_ZOOM_SCALE" [max]="MAX_ZOOM_SCALE" step="0.1" [(ngModel)]="zoomScale" (change)="updateZoom($event)" class="w-full" />
+    </label>
+    <label class="flex flex-col w-full">Contrast:
+      <input id="contrast-slider" type="range" [min]="MIN_CONTRAST_WIDTH" [max]="MAX_CONTRAST_WIDTH" step="10" [(ngModel)]="contrastWidth" (change)="updateContrast($event)" class="w-full" />
+    </label>
+    <label class="flex flex-col w-full">Frame:
+      <div class="w-full space-x-2">
+        <button (click)="previousFrame()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 w-28">Previous</button>
+        <button (click)="nextFrame()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 w-28">Next</button>
+      </div>
+    </label>
+  </div> -->
+
+  <!-- Feedback Box -->
+  <div class="mt-4 w-[900px] flex items-center flex-col space-y-2">
+    <textarea [(ngModel)]="feedback" class="w-full h-24 min-h-24 focus-visible:outline-none p-3 text-lg border border-gray-300 rounded" placeholder="Write your feedback here..."></textarea>
+    <button (click)="handleSave()"  class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 w-40 uppercase">Save Feedback</button>
+  </div>
+</div>
